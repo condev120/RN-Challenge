@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity } from 'react-native'
+import { LogBox, StyleSheet, TouchableOpacity } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
@@ -11,10 +11,12 @@ import Settings from './screens/Settings'
 
 import { colors, sizes } from './lib/styles'
 
+LogBox.ignoreAllLogs(['ViewPropTypes']);
+
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
 
-const tabOptions = ({ route }) => ({
+const tabOptions = ({ route, navigation }) => ({
   tabBarActiveTintColor: colors.primary,
   tabBarInactiveTintColor: colors.neutral,
   tabBarIcon: ({ focused, color }) => {
@@ -41,7 +43,21 @@ const tabOptions = ({ route }) => ({
       }
     }
     return <Icon name={iconName} size={20} color={color} />
-  }
+  },
+  headerRight: ({ canGoBack }) => {
+    if (!canGoBack && route.name == 'Discover') {
+      return (
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Settings')}
+        >
+          <Icon name="ios-filter-outline" size={sizes.xxl} color={colors.black} />
+        </TouchableOpacity>
+      )
+    }
+    return null
+
+  },
 })
 
 const stackOptions = ({ route, navigation }) => ({
@@ -60,7 +76,7 @@ const stackOptions = ({ route, navigation }) => ({
         <Icon name="chevron-back" size={sizes.xxl} color={colors.black} />
       </TouchableOpacity>
     )
-  }
+  },
 })
 
 function Main() {
