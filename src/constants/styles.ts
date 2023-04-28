@@ -1,3 +1,5 @@
+import { TextStyle } from 'react-native'
+
 export const colors = {
   light: '#f0f0f0',
   neutral: '#757575',
@@ -6,12 +8,14 @@ export const colors = {
   primary: '#0d9488'
 }
 
-export const fontWeights = {
-  normal: '400',
-  bold: '700'
-}
+export const fontWeights: Record<string, TextStyle['fontWeight'] | undefined> =
+  {
+    normal: '400',
+    bold: '700'
+  }
 
 export const sizes = {
+  xxs: 4,
   xs: 10,
   sm: 12,
   md: 14,
@@ -45,7 +49,7 @@ export const textStyles = {
   h3: {
     fontSize: sizes.lg,
     color: colors.black,
-    fontWeight: fontWeights.bold,
+    fontWeight: fontWeights.normal,
     marginBottom: 8
   },
   h4: {
@@ -58,5 +62,5 @@ export const textStyles = {
 
 export const containerStyles = {
   flex: 1,
-  backgroundColor: '#ffffff'
+  backgroundColor: colors.white
 }
