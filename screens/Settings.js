@@ -1,4 +1,8 @@
+import { useContext, useState } from 'react';
 import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -8,6 +12,7 @@ import {
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Icon from 'react-native-vector-icons/Ionicons'
+import { GenreContext } from '../contexts/genres';
 
 import {
   colors,
@@ -17,79 +22,100 @@ import {
   textStyles
 } from '../lib/styles'
 
-export default function Settings({ navigation }) {
-  const insets = useSafeAreaInsets()
+export default function Settings({ navigation, route }) {
+  const insets = useSafeAreaInsets();
+  const {genreState} = useContext(GenreContext);
+  const genres= genreState.genres;
+  const [state, setState] = useState(route?.params?.filterState ?? {
+    sort_by: 'popularity.desc',
+    with_genres: [],
+    year: null,
+    "with_runtime.gte": null,
+    "with_runtime.lte": null,
+  })
 
   return (
-    <View
-      style={[
-        containerStyles,
-        {
-          paddingBottom: insets.bottom
-        }
-      ]}
-    >
+    <KeyboardAvoidingView style={containerStyles} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <ScrollView contentContainerStyle={styles.wrapper}>
         <View>
           <Text style={textStyles.h2}>Sort by</Text>
           <View>
-            <SortOption name="Popularity" selected={true} />
-            <SortOption name="Rating" selected={false} />
-            <SortOption name="Newest First" selected={false} />
-            <SortOption name="Oldest First" selected={false} />
+            <SortOption name="Popularity" selected={state.sort_by === 'popularity.desc'} onSelect={() => setState(state => ({...state, sort_by: 'popularity.desc'}))} />
+            <SortOption name="Rating" selected={state.sort_by === 'vote_average.desc'} onSelect={() => setState(state => ({...state, sort_by: 'vote_average.desc'}))} />
+            <SortOption name="Newest First" selected={state.sort_by === 'release_date.desc'} onSelect={() => setState(state => ({...state, sort_by: 'release_date.desc'}))} />
+            <SortOption name="Oldest First" selected={state.sort_by === 'release_date.asc'} onSelect={() => setState(state => ({...state, sort_by: 'release_date.asc'}))} />
           </View>
         </View>
         <View>
           <Text style={textStyles.h2}>Genres</Text>
           <View style={styles.genreList}>
-            <Genre name="Action" selected={false} />
-            <Genre name="Adventure" selected={false} />
-            <Genre name="Animation" selected={false} />
+            {genres?.map(genre => (<Genre name={genre.name} onSelect={() => {
+              setState(state => {
+                const hasId = state.with_genres.some(genId => genId === genre.id);
+                if(hasId){
+                  const newGenres = state.with_genres.filter(genId => genId !== genre.id);
+                  return ({...state, with_genres: [...newGenres]});
+                }
+                return ({...state, with_genres: [...state.with_genres, genre.id]})
+              })
+            }} selected={state.with_genres.includes(genre.id)} />))}
+            {/* {setState(state => ({...state, with_genres: state?.with_genres?.push(genre.id)}))} */}
           </View>
         </View>
         <View>
           <Text style={textStyles.h2}>Year</Text>
           <TextInput
+            value={state.year}
             keyboardType="number-pad"
             style={styles.input}
             maxLength={4}
+            onChangeText={value => setState(state => ({...state, year: value}))}
           />
         </View>
         <View>
           <Text style={textStyles.h2}>Runtime</Text>
           <View style={styles.runtime}>
             <TextInput
+              value={state['with_runtime.gte']}
               keyboardType="number-pad"
               style={styles.input}
               placeholder="From"
               placeholderTextColor={colors.neutral}
               maxLength={3}
+              onChangeText={value => setState(state => ({...state, "with_runtime.gte": value}))}
             />
             <Text style={textStyles.small}>-</Text>
             <TextInput
+              value={state['with_runtime.lte']}
               keyboardType="number-pad"
               style={styles.input}
               placeholder="To"
               placeholderTextColor={colors.neutral}
               maxLength={3}
+              onChangeText={value => setState(state => ({...state, "with_runtime.lte": value}))}
             />
             <Text style={textStyles.small}>minutes</Text>
           </View>
         </View>
       </ScrollView>
-      <View style={styles.buttonContainer}>
+      <View style={[styles.buttonContainer, { paddingBottom: insets.bottom}]}>
         <TouchableOpacity
           activeOpacity={0.7}
           underlayColor={colors.neutral}
           style={styles.button}
           onPress={() => {
-            navigation.goBack()
+            if(Number(state['with_runtime.gte']) > Number(state['with_runtime.lte'])) {
+              Alert.alert('Runtime FROM must less than TO');
+              return;
+            }
+            route?.params?.setState(state);
+            navigation.goBack();
           }}
         >
           <Text style={styles.buttonText}>Save</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   )
 }
 
