@@ -10,7 +10,7 @@ export default function EmptyState({
   onAction
 }) {
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="EmptyState">
       <Image source={image} style={styles.image} />
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.message}>{message}</Text>

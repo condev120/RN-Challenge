@@ -10,7 +10,7 @@ import Discover from './screens/Discover'
 import Settings from './screens/Settings'
 
 import { colors, sizes } from './lib/styles'
-
+import { GenreProvider } from './contexts/genres'
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
 
@@ -77,19 +77,22 @@ function Main() {
 }
 
 function App() {
+  
   return (
-    <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={stackOptions}>
-          <Stack.Screen
-            name="Main"
-            component={Main}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen name="Settings" component={Settings} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaProvider>
+    <GenreProvider>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={stackOptions}>
+            <Stack.Screen
+              name="Main"
+              component={Main}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen name="Settings" component={Settings} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </GenreProvider>
   )
 }
 
